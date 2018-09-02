@@ -16,6 +16,9 @@ clean:
 dev:
 	go build ${LDFLAGS} -o dist/${BINARY} ${PACKAGE}
 
+cibuild:
+	go build -mod=vendor ${LDFLAGS} -o dist/${BINARY} ${PACKAGE}
+
 dist: linux darwin windows
 
 linux:
@@ -30,4 +33,4 @@ windows:
 test:
 	@go test github.com/tombell/moniker
 
-.PHONY: all clean dev dist linux darwin windows test
+.PHONY: all clean dev cibuild dist linux darwin windows test
