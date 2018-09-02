@@ -43,6 +43,6 @@ func main() {
 	}
 
 	if err := moniker.Run(args[0], *format); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
