@@ -8,6 +8,9 @@ import (
 	"github.com/tombell/moniker"
 )
 
+// TODO: add details about available format values to helpText...
+// TODO: add verbose flag for more logging output during a run...
+
 const helpText = `usage: moniker [options] <directory>
 
 Format options:
