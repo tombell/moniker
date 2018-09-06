@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/bogem/id3v2"
 )
@@ -22,14 +23,9 @@ func Run(dir, format string) error {
 		return fmt.Errorf("unable to read files in directory (%s): %s", err)
 	}
 
-	for _, file := range files {
-		if path.Ext(file) != ".mp3" {
-			continue
-		}
-
-		if err := readTags(path.Join(dir, file)); err != nil {
-			return err
-		}
+	if err := renameFiles(dir, format, files); err != nil {
+		// TODO: nicer error messages
+		return fmt.Errorf("error while renaming files: %s", err)
 	}
 
 	return nil
@@ -63,27 +59,40 @@ func readFiles(dir string) ([]string, error) {
 	return names, nil
 }
 
-func readTags(file string) error {
-	tag, err := id3v2.Open(file, id3v2.Options{Parse: true})
-	if err != nil {
-		return err
+func renameFiles(dir, format string, files []string) error {
+	for _, file := range files {
+		if path.Ext(file) != ".mp3" {
+			continue
+		}
+
+		src := path.Join(dir, file)
+
+		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
+		if err != nil {
+			return err
+		}
+		defer tags.Close()
+
+		formatters := map[string]string{
+			"{artist}": tags.Artist(),
+			"{title}":  tags.Title(),
+			"{album}":  tags.Album(),
+			// TODO: add more formatters in the future...
+		}
+
+		filename := format + ".mp3"
+
+		for key, val := range formatters {
+			filename = strings.Replace(filename, key, val, -1)
+		}
+
+		dest := path.Join(dir, filename)
+
+		if err := os.Rename(src, dest); err != nil {
+			// TODO: nicer error messages
+			return err
+		}
 	}
-	defer tag.Close()
-
-	// bpm := tag.CommonID("BPM")
-	// bpmFrame := tag.GetTextFrame(bpm)
-
-	// fmt.Println(tag.Artist())  // {artist}
-	// fmt.Println(tag.Title())   // {title}
-	// fmt.Println(tag.Album())   // {album}
-	// fmt.Println(tag.Genre())   // {genre}
-	// fmt.Println(tag.Year())    // {year}
-	// fmt.Println(bpmFrame.Text) // {bpm}
-	// fmt.Println("---")
 
 	return nil
-}
-
-func rename(src, dst string) error {
-	return os.Rename(src, dst)
 }
