@@ -7,7 +7,7 @@ jobs:
     working_directory: /go/src/github.com/tombell/moniker
     steps:
       - checkout
-      - run: make cibuild
+      - run: GO111MODULE=on make cibuild
 
   # build cmd/moniker with VERSION set to git tag
   build-release:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          VERSION="${CIRCLE_TAG}" make dist
+          GO111MODULE=on VERSION="${CIRCLE_TAG}" make dist
       - save_cache:
           key: dist-{{ .Revision }}
           paths:
