@@ -19,7 +19,7 @@ Special options:
 `
 
 var (
-	format  = flag.String("format", "{artist} - {name}", "")
+	format  = flag.String("format", "{artist} - {title}", "")
 	version = flag.Bool("version", false, "")
 )
 
