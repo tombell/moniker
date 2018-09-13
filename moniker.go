@@ -67,7 +67,7 @@ func renameFiles(dir, format string, files []string) error {
 
 		src := path.Join(dir, file)
 
-		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
+		tags, err := id3v2.Open(src, id3v2.Options{Parse: true, ParseFrames: []string{"Artist", "Title", "Album"}})
 		if err != nil {
 			return err
 		}
