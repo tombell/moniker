@@ -1,33 +1,26 @@
 version: 2
 jobs:
-  # build cmd/moniker
   build:
     docker:
       - image: circleci/golang:1.11.0
-    working_directory: /go/src/github.com/tombell/moniker
     steps:
       - checkout
-      - run: GO111MODULE=on make cibuild
+      - run: make cibuild
 
-  # build cmd/moniker with VERSION set to git tag
   build-release:
     docker:
       - image: circleci/golang:1.11.0
-    working_directory: /go/src/github.com/tombell/moniker
     steps:
       - checkout
-      - run: |
-          GO111MODULE=on VERSION="${CIRCLE_TAG}" make dist
+      - run: VERSION="${CIRCLE_TAG}" make dist
       - save_cache:
           key: dist-{{ .Revision }}
           paths:
             - dist/
 
-  # run releasekit to generate release notes and attach build artifacts
-  release:
+  upload-release:
     docker:
       - image: circleci/golang:1.11.0
-    working_directory: /go/src/github.com/tombell/moniker
     steps:
       - checkout
       - restore_cache:
@@ -72,7 +65,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /.*/
-      - release:
+      - upload-release:
           requires:
             - build-release
           filters:
