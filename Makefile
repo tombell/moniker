@@ -1,12 +1,10 @@
-BINARY=moniker
-GOARCH=amd64
-
 VERSION?=dev
 COMMIT=$(shell git rev-parse HEAD | cut -c -8)
 
 LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Commit=${COMMIT}"
 MODFLAGS=-mod=vendor
 
+BINARY=moniker
 PACKAGE=./cmd/moniker
 
 all: dev
@@ -22,16 +20,16 @@ cibuild:
 
 dist: linux darwin windows
 
-linux:
-	GOOS=linux GOARCH=${GOARCH} go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-linux-${GOARCH} ${PACKAGE}
-
 darwin:
-	GOOS=darwin GOARCH=${GOARCH} go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-darwin-${GOARCH} ${PACKAGE}
+	GOOS=darwin GOARCH=amd64 go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-darwin-amd64 ${PACKAGE}
+
+linux:
+	GOOS=linux GOARCH=amd64 go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-linux-amd64 ${PACKAGE}
 
 windows:
-	GOOS=windows GOARCH=${GOARCH} go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-windows-${GOARCH} ${PACKAGE}
+	GOOS=windows GOARCH=amd64 go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-windows-amd64 ${PACKAGE}
 
 test:
 	@go test github.com/tombell/moniker
 
-.PHONY: all clean dev cibuild dist linux darwin windows test
+.PHONY: all clean dev cibuild dist darwin linux windows test
