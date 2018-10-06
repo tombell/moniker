@@ -13,12 +13,9 @@ clean:
 	rm -fr dist/
 
 dev:
-	go build ${LDFLAGS} -o dist/${BINARY} ${PACKAGE}
-
-cibuild:
 	go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY} ${PACKAGE}
 
-dist: linux darwin windows
+dist: darwin linux windows
 
 darwin:
 	GOOS=darwin GOARCH=amd64 go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-darwin-amd64 ${PACKAGE}
@@ -30,6 +27,6 @@ windows:
 	GOOS=windows GOARCH=amd64 go build ${MODFLAGS} ${LDFLAGS} -o dist/${BINARY}-windows-amd64 ${PACKAGE}
 
 test:
-	@go test github.com/tombell/moniker
+	go test ${MODFLAGS} ./...
 
-.PHONY: all clean dev cibuild dist darwin linux windows test
+.PHONY: all clean dev dist darwin linux windows test
