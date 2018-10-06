@@ -20,7 +20,7 @@ func Run(dir, format string) error {
 	files, err := readFiles(dir)
 	if err != nil {
 		// TODO: nicer error messages
-		return fmt.Errorf("unable to read files in directory (%s): %s", err)
+		return fmt.Errorf("unable to read files in directory (%s): %s", dir, err)
 	}
 
 	if err := renameFiles(dir, format, files); err != nil {
