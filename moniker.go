@@ -74,9 +74,9 @@ func renameFiles(dir, format string, files []string) error {
 		defer tags.Close()
 
 		formatters := map[string]string{
-			"{artist}": tags.Artist(),
-			"{title}":  tags.Title(),
-			"{album}":  tags.Album(),
+			"{artist}": strings.Trim(tags.Artist(), string(0)),
+			"{title}":  strings.Trim(tags.Title(), string(0)),
+			"{album}":  strings.Trim(tags.Album(), string(0)),
 			// TODO: add more formatters in the future...
 		}
 
@@ -88,8 +88,10 @@ func renameFiles(dir, format string, files []string) error {
 
 		dest := path.Join(dir, filename)
 
+		src = strings.Trim(src, string(0))
+		dest = strings.Trim(dest, string(0))
+
 		if err := os.Rename(src, dest); err != nil {
-			// TODO: nicer error messages
 			return err
 		}
 	}
