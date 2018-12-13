@@ -67,9 +67,10 @@ func renameFiles(dir, format string, files []string) error {
 
 		src := path.Join(dir, file)
 
-		tags, err := id3v2.Open(src, id3v2.Options{Parse: true, ParseFrames: []string{"Artist", "Title", "Album"}})
+		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
 		if err != nil {
-			return err
+			fmt.Printf("could not parse ID3 tags: %v (%v)\n", src, err)
+			continue
 		}
 		defer tags.Close()
 
@@ -77,6 +78,8 @@ func renameFiles(dir, format string, files []string) error {
 			"{artist}": strings.Trim(tags.Artist(), string(0)),
 			"{title}":  strings.Trim(tags.Title(), string(0)),
 			"{album}":  strings.Trim(tags.Album(), string(0)),
+			"{genre}":  strings.Trim(tags.Genre(), string(0)),
+
 			// TODO: add more formatters in the future...
 		}
 
@@ -92,7 +95,7 @@ func renameFiles(dir, format string, files []string) error {
 		dest = strings.Trim(dest, string(0))
 
 		if err := os.Rename(src, dest); err != nil {
-			return err
+			fmt.Printf("failed to rename file: %v (%v)\n", src, err)
 		}
 	}
 
