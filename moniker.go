@@ -86,7 +86,7 @@ func renameFiles(dir, format string, files []string) error {
 		filename := format + ".mp3"
 
 		for key, val := range formatters {
-			filename = strings.Title(strings.Replace(filename, key, val, -1))
+			filename = strings.Replace(filename, key, strings.Title(val), -1)
 		}
 
 		filename = strings.Replace(filename, "/", "_", -1)
