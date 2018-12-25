@@ -89,7 +89,7 @@ func renameFiles(dir, format string, files []string) error {
 			filename = strings.Replace(filename, key, val, -1)
 		}
 
-		filename = strings.Replace(filename, "/", "_")
+		filename = strings.Replace(filename, "/", "_", -1)
 
 		dest := path.Join(dir, filename)
 
