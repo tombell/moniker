@@ -1,3 +1,3 @@
 # moniker
 
-[![CircleCI](https://circleci.com/gh/tombell/moniker/tree/master.svg?style=svg)](https://circleci.com/gh/tombell/moniker/tree/master)
+CLI app to rename MP3s according to ID3v2 tags.
