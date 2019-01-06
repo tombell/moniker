@@ -14,6 +14,7 @@ import (
 const helpText = `usage: moniker [options] <directory>
 
 Format options:
+  --title    specify that format values should be title casing
   --format   specify format of the file name to be changed to
 
 Special options:
@@ -22,6 +23,7 @@ Special options:
 `
 
 var (
+	title   = flag.Bool("title", false, "")
 	format  = flag.String("format", "{artist} - {title}", "")
 	version = flag.Bool("version", false, "")
 )
