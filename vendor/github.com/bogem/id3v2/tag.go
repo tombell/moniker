@@ -46,34 +46,36 @@ func (tag *Tag) AddFrame(id string, f Framer) {
 	}
 }
 
-// AddAttachedPicture adds a picture frame to tag.
+// AddAttachedPicture adds the picture frame to tag.
 func (tag *Tag) AddAttachedPicture(pf PictureFrame) {
-	id := tag.CommonID("Attached picture")
-	tag.AddFrame(id, pf)
+	tag.AddFrame(tag.CommonID("Attached picture"), pf)
 }
 
-// AddCommentFrame adds a comment frame to tag.
+// AddCommentFrame adds the comment frame to tag.
 func (tag *Tag) AddCommentFrame(cf CommentFrame) {
-	id := tag.CommonID("Comments")
-	tag.AddFrame(id, cf)
+	tag.AddFrame(tag.CommonID("Comments"), cf)
 }
 
-// AddUnsynchronisedLyricsFrame adds an unsynchronised lyrics/text frame
+// AddTextFrame creates the text frame with provided encoding and text
+// and adds to tag.
+func (tag *Tag) AddTextFrame(id string, encoding Encoding, text string) {
+	tag.AddFrame(id, TextFrame{Encoding: encoding, Text: text})
+}
+
+// AddUnsynchronisedLyricsFrame adds the unsynchronised lyrics/text frame
 // to tag.
 func (tag *Tag) AddUnsynchronisedLyricsFrame(uslf UnsynchronisedLyricsFrame) {
-	id := tag.CommonID("Unsynchronised lyrics/text transcription")
-	tag.AddFrame(id, uslf)
+	tag.AddFrame(tag.CommonID("Unsynchronised lyrics/text transcription"), uslf)
 }
 
-// AddUserDefinedTextFrame adds a custom frame (TXXX) to tag.
-func (tag *Tag) AddUserDefinedTextFrame(uf UserDefinedTextFrame) {
-	id := tag.CommonID("User defined text information frame")
-	tag.AddFrame(id, uf)
+// AddUserDefinedTextFrame adds the custom frame (TXXX) to tag.
+func (tag *Tag) AddUserDefinedTextFrame(udtf UserDefinedTextFrame) {
+	tag.AddFrame(tag.CommonID("User defined text information frame"), udtf)
 }
 
-// AddUFIDFrame adds a unique file identifier frame (UFID) to tag.
-func (tag *Tag) AddUFIDFrame(uf UFIDFrame) {
-	tag.AddFrame("UFID", uf)
+// AddUFIDFrame adds the unique file identifier frame (UFID) to tag.
+func (tag *Tag) AddUFIDFrame(ufid UFIDFrame) {
+	tag.AddFrame(tag.CommonID("Unique file identifier"), ufid)
 }
 
 // CommonID returns ID3v2.3 or ID3v2.4 (in appropriate to version of Tag) frame ID
@@ -178,6 +180,28 @@ func (tag *Tag) GetTextFrame(id string) TextFrame {
 	return tf
 }
 
+// DefaultEncoding returns default encoding of tag.
+// Default encoding is used in methods (e.g. SetArtist, SetAlbum ...) for
+// setting text frames without the explicit providing of encoding.
+func (tag *Tag) DefaultEncoding() Encoding {
+	return tag.defaultEncoding
+}
+
+// SetDefaultEncoding sets default encoding for tag.
+// Default encoding is used in methods (e.g. SetArtist, SetAlbum ...) for
+// setting text frames without explicit providing encoding.
+func (tag *Tag) SetDefaultEncoding(encoding Encoding) {
+	tag.defaultEncoding = encoding
+}
+
+func (tag *Tag) setDefaultEncodingBasedOnVersion(version byte) {
+	if version == 4 {
+		tag.SetDefaultEncoding(EncodingUTF8)
+	} else {
+		tag.SetDefaultEncoding(EncodingISO)
+	}
+}
+
 // Count returns the number of frames in tag.
 func (tag *Tag) Count() int {
 	n := len(tag.frames)
@@ -194,48 +218,43 @@ func (tag *Tag) HasFrames() bool {
 }
 
 func (tag *Tag) Title() string {
-	f := tag.GetTextFrame(tag.CommonID("Title"))
-	return f.Text
+	return tag.GetTextFrame(tag.CommonID("Title")).Text
 }
 
 func (tag *Tag) SetTitle(title string) {
-	tag.AddFrame(tag.CommonID("Title"), TextFrame{Encoding: tag.defaultEncoding, Text: title})
+	tag.AddTextFrame(tag.CommonID("Title"), tag.DefaultEncoding(), title)
 }
 
 func (tag *Tag) Artist() string {
-	f := tag.GetTextFrame(tag.CommonID("Artist"))
-	return f.Text
+	return tag.GetTextFrame(tag.CommonID("Artist")).Text
 }
 
 func (tag *Tag) SetArtist(artist string) {
-	tag.AddFrame(tag.CommonID("Artist"), TextFrame{Encoding: tag.defaultEncoding, Text: artist})
+	tag.AddTextFrame(tag.CommonID("Artist"), tag.DefaultEncoding(), artist)
 }
 
 func (tag *Tag) Album() string {
-	f := tag.GetTextFrame(tag.CommonID("Album/Movie/Show title"))
-	return f.Text
+	return tag.GetTextFrame(tag.CommonID("Album/Movie/Show title")).Text
 }
 
 func (tag *Tag) SetAlbum(album string) {
-	tag.AddFrame(tag.CommonID("Album/Movie/Show title"), TextFrame{Encoding: tag.defaultEncoding, Text: album})
+	tag.AddTextFrame(tag.CommonID("Album/Movie/Show title"), tag.DefaultEncoding(), album)
 }
 
 func (tag *Tag) Year() string {
-	f := tag.GetTextFrame(tag.CommonID("Year"))
-	return f.Text
+	return tag.GetTextFrame(tag.CommonID("Year")).Text
 }
 
 func (tag *Tag) SetYear(year string) {
-	tag.AddFrame(tag.CommonID("Year"), TextFrame{Encoding: tag.defaultEncoding, Text: year})
+	tag.AddTextFrame(tag.CommonID("Year"), tag.DefaultEncoding(), year)
 }
 
 func (tag *Tag) Genre() string {
-	f := tag.GetTextFrame(tag.CommonID("Content type"))
-	return f.Text
+	return tag.GetTextFrame(tag.CommonID("Content type")).Text
 }
 
 func (tag *Tag) SetGenre(genre string) {
-	tag.AddFrame(tag.CommonID("Content type"), TextFrame{Encoding: tag.defaultEncoding, Text: genre})
+	tag.AddTextFrame(tag.CommonID("Content type"), tag.DefaultEncoding(), genre)
 }
 
 // iterateOverAllFrames iterates over every single frame in tag and calls
@@ -287,7 +306,7 @@ func (tag *Tag) SetVersion(version byte) {
 		return
 	}
 	tag.version = version
-	tag.setDefaultEncoding(version)
+	tag.setDefaultEncodingBasedOnVersion(version)
 }
 
 // Save writes tag to the file, if tag was opened with a file.
