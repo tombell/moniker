@@ -10,21 +10,22 @@ import (
 	"github.com/bogem/id3v2"
 )
 
-// Run renames the MP3s in the given directory according to the given format.
+// Run renames the MP3s in the given directory according to the given format
+// based on ID3 tags.
 func Run(dir, format string) error {
 	if !exists(dir) {
-		// TODO: nicer error messages
-		return fmt.Errorf("directory (%s) does not exist", dir)
+		// TODO: better error message
+		return fmt.Errorf("directory '%s' does not exist", dir)
 	}
 
 	files, err := readFiles(dir)
 	if err != nil {
-		// TODO: nicer error messages
-		return fmt.Errorf("unable to read files in directory (%s): %s", dir, err)
+		// TODO: better error message
+		return fmt.Errorf("unable to read files in directory: %s", err)
 	}
 
 	if err := renameFiles(dir, format, files); err != nil {
-		// TODO: nicer error messages
+		// TODO: better error message
 		return fmt.Errorf("error while renaming files: %s", err)
 	}
 
@@ -62,6 +63,7 @@ func readFiles(dir string) ([]string, error) {
 func renameFiles(dir, format string, files []string) error {
 	for _, file := range files {
 		if path.Ext(file) != ".mp3" {
+			// Skipping non-MP3 files...
 			continue
 		}
 
@@ -69,32 +71,31 @@ func renameFiles(dir, format string, files []string) error {
 
 		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
 		if err != nil {
-			fmt.Printf("could not parse ID3 tags: %v (%v)\n", src, err)
+			// Skipping when failing to read ID3 tags...
 			continue
 		}
 		defer tags.Close()
 
-		formatters := map[string]string{
-			"{artist}": strings.Trim(tags.Artist(), string(0)),
-			"{title}":  strings.Trim(tags.Title(), string(0)),
-			"{album}":  strings.Trim(tags.Album(), string(0)),
-			"{genre}":  strings.Trim(tags.Genre(), string(0)),
-
-			// TODO: add more formatters in the future...
-		}
-
 		filename := format + ".mp3"
 
+		formatters := map[string]string{
+			"{artist}": trimNull(tags.Artist()),
+			"{title}":  trimNull(tags.Title()),
+			"{album}":  trimNull(tags.Album()),
+			"{genre}":  trimNull(tags.Genre()),
+		}
+
 		for key, val := range formatters {
-			filename = strings.Replace(filename, key, strings.Title(val), -1)
+			filename = strings.Replace(filename, key, val, -1)
 		}
 
 		filename = strings.Replace(filename, "/", "_", -1)
+		filename = strings.Replace(filename, "\\", "_", -1)
 
 		dest := path.Join(dir, filename)
 
-		src = strings.Trim(src, string(0))
-		dest = strings.Trim(dest, string(0))
+		src = trimNull(src)
+		dest = trimNull(dest)
 
 		if err := os.Rename(src, dest); err != nil {
 			fmt.Printf("failed to rename file: %v (%v)\n", src, err)
@@ -102,4 +103,8 @@ func renameFiles(dir, format string, files []string) error {
 	}
 
 	return nil
+}
+
+func trimNull(str string) string {
+	return strings.Trim(str, string(0))
 }
