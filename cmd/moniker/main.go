@@ -23,9 +23,9 @@ Special options:
 `
 
 var (
-	title   = flag.Bool("title", false, "")
-	format  = flag.String("format", "{artist} - {title}", "")
-	version = flag.Bool("version", false, "")
+	title  = flag.Bool("title", false, "")
+	format = flag.String("format", "{artist} - {title}", "")
+	vrsn   = flag.Bool("version", false, "")
 )
 
 func usage() {
@@ -37,8 +37,8 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if *version {
-		fmt.Fprintf(os.Stdout, "moniker %s (%s)\n", Version, Commit)
+	if *vrsn {
+		fmt.Fprintf(os.Stdout, "moniker %s (%s)\n", version, commit)
 		os.Exit(0)
 	}
 
