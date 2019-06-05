@@ -14,19 +14,16 @@ import (
 // based on ID3 tags.
 func Run(dir, format string) error {
 	if !exists(dir) {
-		// TODO: better error message
-		return fmt.Errorf("directory '%s' does not exist", dir)
+		return fmt.Errorf("error directory does not exist: %s", dir)
 	}
 
 	files, err := readFiles(dir)
 	if err != nil {
-		// TODO: better error message
-		return fmt.Errorf("unable to read files in directory: %s", err)
+		return fmt.Errorf("error reading files in directory: %s", err)
 	}
 
 	if err := renameFiles(dir, format, files); err != nil {
-		// TODO: better error message
-		return fmt.Errorf("error while renaming files: %s", err)
+		return fmt.Errorf("error renaming files: %s", err)
 	}
 
 	return nil
