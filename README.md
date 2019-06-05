@@ -19,4 +19,25 @@ On macOS you can use [Homebrew](https://brew.sh) to install.
 
 ## Usage
 
-Coming soon.
+Using `moniker` is very simple, and only has 1 optional flag for specifying the
+filename formatting. By default the format will be `{artist} - {title}`.
+
+If you wish to use another format, you can use the `--format` flag, and the
+formatter options.
+
+Currently supported options:
+
+  - `{artist}`
+  - `{title}`
+  - `{album}`
+  - `{genre}`
+
+Additional formatter options will be added in the future for other ID3v2 tags on
+MP3 files.
+
+So to rename directory of MP3 files, including the artist, title, and genre the
+command would be as follows.
+
+    moniker --format "{genre} - {artist} - {title}" ~/Music/New
+
+That's all!
