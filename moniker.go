@@ -10,6 +10,10 @@ import (
 	"github.com/bogem/id3v2"
 )
 
+const (
+	validFileExtension = ".mp3"
+)
+
 // Run renames the MP3s in the given directory according to the given format
 // based on ID3 tags.
 func Run(dir, format string) error {
@@ -59,47 +63,48 @@ func readFiles(dir string) ([]string, error) {
 
 func renameFiles(dir, format string, files []string) error {
 	for _, file := range files {
-		if path.Ext(file) != ".mp3" {
-			// Skipping non-MP3 files...
+		if path.Ext(file) != validFileExtension {
 			continue
 		}
 
-		src := path.Join(dir, file)
+		src := path.Join(trimNull(dir), file)
 
 		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
+		defer tags.Close()
 		if err != nil {
-			// Skipping when failing to read ID3 tags...
 			continue
 		}
-		defer tags.Close()
 
-		filename := format + ".mp3"
-
-		formatters := map[string]string{
-			"{artist}": trimNull(tags.Artist()),
-			"{title}":  trimNull(tags.Title()),
-			"{album}":  trimNull(tags.Album()),
-			"{genre}":  trimNull(tags.Genre()),
-		}
-
-		for key, val := range formatters {
-			filename = strings.Replace(filename, key, val, -1)
-		}
-
-		filename = strings.Replace(filename, "/", "_", -1)
-		filename = strings.Replace(filename, "\\", "_", -1)
-
-		dest := path.Join(dir, filename)
-
-		src = trimNull(src)
-		dest = trimNull(dest)
+		filename := generateFilename(format, tags)
+		dest := trimNull(path.Join(dir, filename))
 
 		if err := os.Rename(src, dest); err != nil {
-			fmt.Printf("failed to rename file: %v (%v)\n", src, err)
+			fmt.Fprintf(os.Stderr, "error renaming file: %v (%s)\n", src, err)
 		}
 	}
 
 	return nil
+}
+
+func generateFilename(format string, tags *id3v2.Tag) string {
+	filename := format + validFileExtension
+
+	formatters := map[string]string{
+		"{album}":  trimNull(tags.Album()),
+		"{artist}": trimNull(tags.Artist()),
+		"{genre}":  trimNull(tags.Genre()),
+		"{title}":  trimNull(tags.Title()),
+		"{year}":   trimNull(tags.Year()),
+	}
+
+	for key, val := range formatters {
+		filename = strings.Replace(filename, key, val, -1)
+	}
+
+	filename = strings.Replace(filename, "/", "_", -1)
+	filename = strings.Replace(filename, "\\", "_", -1)
+
+	return filename
 }
 
 func trimNull(str string) string {
