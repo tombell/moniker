@@ -1,6 +1,6 @@
 # moniker
 
-CLI app to rename MP3 files according to ID3v2 tags.
+A command-line tool to rename MP3 files according to ID3v2 tags.
 
 ## Installation
 
@@ -27,13 +27,11 @@ formatter options.
 
 Currently supported options:
 
-  - `{artist}`
-  - `{title}`
   - `{album}`
+  - `{artist}`
   - `{genre}`
-
-Additional formatter options will be added in the future for other ID3v2 tags on
-MP3 files.
+  - `{title}`
+  - `{year}`
 
 So to rename directory of MP3 files, including the artist, title, and genre the
 command would be as follows.
