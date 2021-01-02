@@ -1,6 +1,6 @@
-# github.com/bogem/id3v2 v1.1.1
+# github.com/bogem/id3v2 v1.2.0
 github.com/bogem/id3v2
-# golang.org/x/text v0.3.2
+# golang.org/x/text v0.3.4
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/internal

@@ -15,6 +15,9 @@ const frameHeaderSize = 10
 var ErrUnsupportedVersion = errors.New("unsupported version of ID3 tag")
 var errBlankFrame = errors.New("id or size of frame are blank")
 
+// ErrBodyOverflow is returned when a frame has greater size than the remaining tag size
+var ErrBodyOverflow = errors.New("frame went over tag area")
+
 type frameHeader struct {
 	ID       string
 	BodySize int64
@@ -58,15 +61,8 @@ func (tag *Tag) init(rd io.Reader, originalSize int64, version byte) {
 func (tag *Tag) parseFrames(opts Options) error {
 	framesSize := tag.originalSize - tagHeaderSize
 
-	// Convert descriptions, specified by user in opts.ParseFrames, to IDs.
-	var parseIDs map[string]bool
+	parseableIDs := tag.makeIDsFromDescriptions(opts.ParseFrames)
 	isParseFramesProvided := len(opts.ParseFrames) > 0
-	if isParseFramesProvided {
-		parseIDs = make(map[string]bool, len(opts.ParseFrames))
-		for _, description := range opts.ParseFrames {
-			parseIDs[tag.CommonID(description)] = true
-		}
-	}
 
 	synchSafe := tag.Version() == 4
 
@@ -87,11 +83,14 @@ func (tag *Tag) parseFrames(opts Options) error {
 		id, bodySize := header.ID, header.BodySize
 
 		framesSize -= frameHeaderSize + bodySize
+		if framesSize < 0 {
+			return ErrBodyOverflow
+		}
 
 		bodyRd := getLimitedReader(tag.reader, bodySize)
 		defer putLimitedReader(bodyRd)
 
-		if isParseFramesProvided && !parseIDs[id] {
+		if isParseFramesProvided && !parseableIDs[id] {
 			if err := skipReaderBuf(bodyRd, buf); err != nil {
 				return err
 			}
@@ -107,11 +106,11 @@ func (tag *Tag) parseFrames(opts Options) error {
 		tag.AddFrame(id, frame)
 
 		if isParseFramesProvided && !mustFrameBeInSequence(id) {
-			delete(parseIDs, id)
+			delete(parseableIDs, id)
 
 			// If it was last ID in parseIDs, we don't need to parse
 			// other frames, so end the parsing.
-			if len(parseIDs) == 0 {
+			if len(parseableIDs) == 0 {
 				break
 			}
 		}
@@ -122,6 +121,16 @@ func (tag *Tag) parseFrames(opts Options) error {
 	}
 
 	return nil
+}
+
+func (tag *Tag) makeIDsFromDescriptions(parseFrames []string) map[string]bool {
+	ids := make(map[string]bool, len(parseFrames))
+
+	for _, description := range parseFrames {
+		ids[tag.CommonID(description)] = true
+	}
+
+	return ids
 }
 
 func parseFrameHeader(buf []byte, rd io.Reader, synchSafe bool) (frameHeader, error) {
