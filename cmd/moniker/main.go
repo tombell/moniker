@@ -8,13 +8,20 @@ import (
 	"github.com/tombell/moniker"
 )
 
-// TODO: add details about available format values to helpText...
 // TODO: add verbose flag for more logging output during a run...
 
 const helpText = `usage: moniker [options] <directory>
 
 Format options:
   --format   specify format of the file name to be changed to
+
+    the available formatting tokens are:
+
+     - {album}
+     - {artist}
+     - {genre}
+     - {title}
+     - {year}
 
 Special options:
   --help     show this message, then exit
