@@ -22,4 +22,7 @@ $(PLATFORMS):
 test:
 	go test ${MODFLAGS} ./...
 
-.PHONY: all clean dev dist $(PLATFORMS) test
+modules:
+	@go get -u ./... && go mod download && go mod tidy && go mod vendor
+
+.PHONY: all clean dev dist $(PLATFORMS) test modules
