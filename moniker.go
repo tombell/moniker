@@ -104,5 +104,5 @@ func generateFilename(format string, tags *id3v2.Tag) string {
 }
 
 func trimNull(str string) string {
-	return strings.Trim(str, string(0))
+	return strings.Trim(str, "\x00")
 }
