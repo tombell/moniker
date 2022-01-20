@@ -7,11 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/bogem/id3v2"
-)
-
-const (
-	validFileExtension = ".mp3"
+	"github.com/bogem/id3v2/v2"
 )
 
 // Run renames the MP3s in the given directory according to the given format
@@ -63,7 +59,7 @@ func readFiles(dir string) ([]string, error) {
 
 func renameFiles(dir, format string, files []string) error {
 	for _, file := range files {
-		if path.Ext(file) != validFileExtension {
+		if path.Ext(file) != ".mp3" {
 			continue
 		}
 
@@ -87,7 +83,7 @@ func renameFiles(dir, format string, files []string) error {
 }
 
 func generateFilename(format string, tags *id3v2.Tag) string {
-	filename := format + validFileExtension
+	filename := format + ".mp3"
 
 	formatters := map[string]string{
 		"{album}":  trimNull(tags.Album()),

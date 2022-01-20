@@ -1,7 +1,7 @@
 module github.com/tombell/moniker
 
 require (
-	github.com/bogem/id3v2 v1.2.0
+	github.com/bogem/id3v2/v2 v2.1.2
 	golang.org/x/text v0.3.7 // indirect
 )
 
