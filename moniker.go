@@ -10,8 +10,6 @@ import (
 	"github.com/bogem/id3v2/v2"
 )
 
-// Run renames the MP3s in the given directory according to the given format
-// based on ID3 tags.
 func Run(dir, format string) error {
 	if !exists(dir) {
 		return fmt.Errorf("error directory does not exist: %s", dir)
