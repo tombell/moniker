@@ -11,65 +11,41 @@ import (
 )
 
 func Run(dir, format string) error {
-	if !exists(dir) {
-		return fmt.Errorf("error directory does not exist: %s", dir)
-	}
-
-	files, err := readFiles(dir)
-	if err != nil {
-		return fmt.Errorf("error reading files in directory: %s", err)
-	}
-
-	if err := renameFiles(dir, format, files); err != nil {
-		return fmt.Errorf("error renaming files: %s", err)
-	}
-
-	return nil
-}
-
-func exists(dir string) bool {
-	_, err := os.Stat(dir)
-	if err == nil {
-		return true
-	}
-
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	return true
-}
-
-func readFiles(dir string) ([]string, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("ioutil read dir failed: %w", err)
 	}
 
-	names := make([]string, 0)
-
 	for _, file := range files {
-		names = append(names, file.Name())
-	}
-
-	return names, nil
-}
-
-func renameFiles(dir, format string, files []string) error {
-	for _, file := range files {
-		if path.Ext(file) != ".mp3" {
+		if path.Ext(file.Name()) != ".mp3" {
 			continue
 		}
 
-		src := path.Join(trimNull(dir), file)
+		src := path.Join(trimNull(dir), file.Name())
 
 		tags, err := id3v2.Open(src, id3v2.Options{Parse: true})
-		defer tags.Close()
 		if err != nil {
 			continue
 		}
+		defer tags.Close()
 
-		filename := generateFilename(format, tags)
+		filename := format + ".mp3"
+
+		formatters := map[string]string{
+			"{album}":  trimNull(tags.Album()),
+			"{artist}": trimNull(tags.Artist()),
+			"{genre}":  trimNull(tags.Genre()),
+			"{title}":  trimNull(tags.Title()),
+			"{year}":   trimNull(tags.Year()),
+		}
+
+		for key, val := range formatters {
+			filename = strings.ReplaceAll(filename, key, val)
+		}
+
+		filename = strings.ReplaceAll(filename, "/", "_")
+		filename = strings.ReplaceAll(filename, "\\", "_")
+
 		dest := trimNull(path.Join(dir, filename))
 
 		if err := os.Rename(src, dest); err != nil {
@@ -78,27 +54,6 @@ func renameFiles(dir, format string, files []string) error {
 	}
 
 	return nil
-}
-
-func generateFilename(format string, tags *id3v2.Tag) string {
-	filename := format + ".mp3"
-
-	formatters := map[string]string{
-		"{album}":  trimNull(tags.Album()),
-		"{artist}": trimNull(tags.Artist()),
-		"{genre}":  trimNull(tags.Genre()),
-		"{title}":  trimNull(tags.Title()),
-		"{year}":   trimNull(tags.Year()),
-	}
-
-	for key, val := range formatters {
-		filename = strings.Replace(filename, key, val, -1)
-	}
-
-	filename = strings.Replace(filename, "/", "_", -1)
-	filename = strings.Replace(filename, "\\", "_", -1)
-
-	return filename
 }
 
 func trimNull(str string) string {
