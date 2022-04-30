@@ -13,10 +13,6 @@ You can also `go get` to install from source.
 
     go get -u github.com/tombell/moniker/cmd/moniker
 
-On macOS you can use [Homebrew](https://brew.sh) to install.
-
-    brew tap tombell/formulae && brew install tombell/formulae/moniker
-
 ## Usage
 
 Using `moniker` is very simple, and only has 1 optional flag for specifying the
