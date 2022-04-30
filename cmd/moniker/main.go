@@ -25,8 +25,7 @@ Format options:
 
 Special options:
   --help     show this message, then exit
-  --version  show the version number, then exit
-`
+  --version  show the version number, then exit`
 
 var (
 	format = flag.String("format", "{artist} - {title}", "")
@@ -34,7 +33,7 @@ var (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, helpText)
+	fmt.Fprintln(os.Stderr, helpText)
 	os.Exit(2)
 }
 
