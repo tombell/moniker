@@ -25,4 +25,5 @@ test:
 clean:
 	rm -fr dist
 
-.PHONY: all dev prod $(PLATFORMS) test clean
+.DEFAULT_GOAL := dev
+.PHONY: dev prod $(PLATFORMS) test clean
